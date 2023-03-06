@@ -2,6 +2,7 @@ import os
 from DataConverter import DataConverter
 from DataGatherer import DataGatherer
 from Logger import Logger
+from sklearn.model_selection import train_test_split
 
 COLUMNS=["metadata_generatedAt", "metadata_recordType", "metadata_serialId_streamId",
          "metadata_serialId_bundleSize", "metadata_serialId_bundleId", "metadata_serialId_recordId",
@@ -23,14 +24,18 @@ class DataCleaner:
 
     def clean_data(self):
         os.makedirs(os.path.dirname(self.cleandatapath), exist_ok=True)
-        self.clean_data = self.data[self.columns]
-        self.clean_data = self.clean_data.dropna()
-        self.clean_data["x_pos"] = self.clean_data["coreData_position"].map(lambda x: DataConverter.point_to_tuple(x)[0])
-        self.clean_data["y_pos"] = self.clean_data["coreData_position"].map(lambda x: DataConverter.point_to_tuple(x)[1])
-        self.clean_data.drop(columns=["coreData_position"], inplace=True)
-        self.clean_data.to_csv(self.cleandatapath, index=False)
-        return self.clean_data
+        self.cleaned_data = self.data[self.columns]
+        self.cleaned_data = self.cleaned_data.dropna()
+        self.cleaned_data["x_pos"] = self.cleaned_data["coreData_position"].map(lambda x: DataConverter.point_to_tuple(x)[0])
+        self.cleaned_data["y_pos"] = self.cleaned_data["coreData_position"].map(lambda x: DataConverter.point_to_tuple(x)[1])
+        self.cleaned_data.drop(columns=["coreData_position"], inplace=True)
+        self.cleaned_data.to_csv(self.cleandatapath, index=False)
+        return self.cleaned_data
+
 
 if __name__ == "__main__":
-    print(DataCleaner().clean_data().head(5))
+    cleaner = DataCleaner()
+    data = cleaner.clean_data()
+    print(data.head(5))
+
 
