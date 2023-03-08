@@ -1,4 +1,6 @@
 import os
+
+import pandas as pd
 from DataConverter import DataConverter
 from DataGatherer import DataGatherer
 from Logger import Logger
@@ -18,7 +20,7 @@ class DataCleaner:
         self.columns = columns
         self.cleandatapath=cleandatapath
         self.logger = Logger("DataCleaner")
-        if self.data == None:
+        if not isinstance(self.data, pd.DataFrame):
             self.logger.log("No data specified. Defaulting to data/raw/subsection.csv")
             self.data = DataGatherer().gather_data()
 
@@ -30,6 +32,9 @@ class DataCleaner:
         self.cleaned_data["y_pos"] = self.cleaned_data["coreData_position"].map(lambda x: DataConverter.point_to_tuple(x)[1])
         self.cleaned_data.drop(columns=["coreData_position"], inplace=True)
         self.cleaned_data.to_csv(self.cleandatapath, index=False)
+        return self
+
+    def getCleanedData(self):
         return self.cleaned_data
 
 

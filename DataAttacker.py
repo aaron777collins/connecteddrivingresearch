@@ -8,9 +8,10 @@ from MathHelper import MathHelper
 
 
 class DataAttacker:
-    def __init__(self, data, modified_data_path="data/modified/modified.csv"):
+    def __init__(self, data, modified_data_path="data/modified/modified.csv", SEED=42):
         self.data = data
         self.modified_data_path = modified_data_path
+        self.SEED = SEED
 
     # Must be run after the data is clean to get a proper result.
     # This function returns the list of unique IDs from the coreData_id column
@@ -26,7 +27,7 @@ class DataAttacker:
         uniqueIDs = self.getUniqueIDsFromCleanData()
 
         # Splits the data into the regular cars and the new chosen attackers (5% attackers)
-        regular, attackers = train_test_split(uniqueIDs, test_size=attack_ratio, random_state=42)
+        regular, attackers = train_test_split(uniqueIDs, test_size=attack_ratio, random_state=self.SEED)
 
         # Adds a column called isAttacker with 0 if they are regular and 1 if they are in the attackers list
         self.data["isAttacker"] = self.data.coreData_id.apply(lambda x: 1 if x in attackers else 0)
@@ -64,7 +65,7 @@ class DataAttacker:
         return self.data
 
 if __name__ == "__main__":
-    cleanData = DataCleaner().clean_data()
+    cleanData = DataCleaner().clean_data().getCleanedData()
     modified_data = DataAttacker(cleanData).add_attackers().add_attacks_positional_offset_const().getData()
     print(modified_data.head(5))
 
