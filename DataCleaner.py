@@ -15,11 +15,11 @@ COLUMNS=["metadata_generatedAt", "metadata_recordType", "metadata_serialId_strea
          "coreData_elevation", "coreData_accelset_accelYaw","coreData_speed", "coreData_heading", "coreData_position"]
 
 class DataCleaner:
-    def __init__(self, data=None, columns=COLUMNS, cleandatapath="data/clean/clean.csv"):
+    def __init__(self, data=None, columns=COLUMNS, cleandatapath="data/clean/clean.csv", logger=Logger("DataCleaner")):
         self.data = data
         self.columns = columns
         self.cleandatapath=cleandatapath
-        self.logger = Logger("DataCleaner")
+        self.logger = logger
         if not isinstance(self.data, pd.DataFrame):
             self.logger.log("No data specified. Defaulting to data/raw/subsection.csv")
             self.data = DataGatherer().gather_data()
@@ -41,6 +41,6 @@ class DataCleaner:
 if __name__ == "__main__":
     cleaner = DataCleaner()
     data = cleaner.clean_data()
-    print(data.head(5))
+    cleaner.logger.log(data.head(5))
 
 

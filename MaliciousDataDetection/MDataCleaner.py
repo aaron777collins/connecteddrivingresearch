@@ -1,5 +1,6 @@
 # Seperates the isAttacker column from the data (and cleans it) and returns the cleaned data and the isAttacker column
 import os
+from Logger import Logger
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -16,21 +17,22 @@ COLUMNS=[
         "coreData_elevation", "coreData_accelset_accelYaw","coreData_speed", "coreData_heading", "x_pos", "y_pos", "isAttacker"]
 
 class MDataCleaner:
-    def __init__(self, data, COLUMNS=COLUMNS, cleandatapath="data/classifierdata/Mclean/clean.csv"):
+    def __init__(self, data, COLUMNS=COLUMNS, cleandatapath="data/classifierdata/Mclean/clean.csv", logger=Logger("MDataCleaner")):
         self.data = data
         self.cleandatapath=cleandatapath
+        self.logger = logger
 
     def clean_data(self):
         os.makedirs(os.path.dirname(self.cleandatapath), exist_ok=True)
 
         # check if the cleaned data already exists
         if os.path.isfile(self.cleandatapath):
-            print("MCleaner: Cleaned data already exists. Reading from file.")
+            self.logger.log("Cleaned data already exists. Reading from file.")
             self.cleaned_data = pd.read_csv(self.cleandatapath)
             return self
 
         # clean the data
-        print("MCleaner: Cleaning data...")
+        self.logger.log("Cleaning data...")
         self.cleaned_data = self.data[COLUMNS]
         # convert the coreData_id from hexadecimal to decimal
         self.cleaned_data["coreData_id"] = self.cleaned_data["coreData_id"].map(lambda x: int(x, 16))

@@ -1,14 +1,14 @@
 import pandas as pd
 import os.path as path
 import os
-import Logger
+from Logger import Logger
 
 class DataGatherer:
-    def __init__(self, numrows=10000, filepath="data/data.csv", subsectionpath="data/sub/subsection.csv"):
+    def __init__(self, numrows=10000, filepath="data/data.csv", subsectionpath="data/sub/subsection.csv", logger=Logger("DataGatherer")):
         self.numrows = numrows
         self.filepath = filepath
         self.subsectionpath = subsectionpath
-        self.logger = Logger.Logger("DataGatherer")
+        self.logger = logger
 
     def gather_data(self) -> pd.DataFrame:
 

@@ -13,6 +13,7 @@ class MDataClassifier:
         self.test_Y = test_Y
         self.elapsed_train_time = -1
         self.elapsed_prediction_time = -1
+        self.elapsed_prediction_train_time = -1
         self.results = None
 
     # training the classifier and tracking the time it takes
@@ -41,6 +42,18 @@ class MDataClassifier:
 
         return self
 
+    def classify_train(self):
+
+        # start time
+        start_time = time.time()
+
+        self.predicted_train_results = self.classifier.predict(self.train_X)
+
+        # elapsed time in seconds
+        self.elapsed_prediction_train_time = time.time() - start_time
+
+        return self
+
     # returns the accuracy, precision, recall, and f1 score of the classifier
     def get_results(self):
         # calculate the accuracy, precision, recall, and f1 score
@@ -48,6 +61,14 @@ class MDataClassifier:
         precision = precision_score(self.test_Y, self.predicted_results)
         recall = recall_score(self.test_Y, self.predicted_results)
         f1 = f1_score(self.test_Y, self.predicted_results)
+        return accuracy, precision, recall, f1
+
+    def get_train_results(self):
+        # calculate the accuracy, precision, recall, and f1 score
+        accuracy = accuracy_score(self.train_Y, self.predicted_train_results)
+        precision = precision_score(self.train_Y, self.predicted_train_results)
+        recall = recall_score(self.train_Y, self.predicted_train_results)
+        f1 = f1_score(self.train_Y, self.predicted_train_results)
         return accuracy, precision, recall, f1
 
     # string representation of the classifier classname as MDataClassifier[classifier_name]
