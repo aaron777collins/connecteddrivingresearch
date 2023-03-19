@@ -86,6 +86,7 @@ class MDataClassifier:
         disp = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix, display_labels=labels)
         disp.plot()
         plt.savefig(path)
+        return self
 
     # string representation of the classifier classname as MDataClassifier[classifier_name]
     def __str__(self):

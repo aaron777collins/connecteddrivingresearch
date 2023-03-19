@@ -60,3 +60,4 @@ class MClassifierPipeline:
     def plot_confusion_matrices(self, path, labels=["Regular", "Malicious"]):
         for mClassifier, confusion_matrix in self.classifiers_and_confusion_matrices:
             mClassifier.plot_confusion_matrix(confusion_matrix, path + "/" + mClassifier.classifier.__class__.__name__ + ".png", labels=labels)
+        return self
