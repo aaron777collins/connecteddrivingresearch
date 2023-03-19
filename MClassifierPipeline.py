@@ -14,12 +14,14 @@ class MClassifierPipeline:
     def __init__(self, train_X, train_Y, test_X, test_Y, classifier_instances=CLASSIFIER_INSTANCES, logger=Logger("MClassifierPipeline")):
 
         self.logger = logger
+        self.classifiers_and_confusion_matrices: list[tuple[MDataClassifier, list[list[float]]]] = []
 
         # create MDataClassifier instances for each classifier
-        self.classifiers = []
+        self.classifiers: list[MDataClassifier] = []
         for classifier_instance in classifier_instances:
             self.classifiers.append(
-                MDataClassifier(classifier_instance, train_X, train_Y, test_X, test_Y))
+                MDataClassifier(classifier_instance, train_X, train_Y, test_X, test_Y, logger=self.logger.newPrefix("MDataClassifier-"+classifier_instance.__class__.__name__)))
+
 
     def train(self):
         for mClassifier in self.classifiers:
@@ -41,3 +43,20 @@ class MClassifierPipeline:
 
     def get_classifier_results(self):
         return self.results
+
+    def calculate_classifiers_and_confusion_matrices(self):
+        self.classifiers_and_confusion_matrices: list[tuple[MDataClassifier, list[list[float]]]] = []
+
+        for mClassifier in self.classifiers:
+            self.classifiers_and_confusion_matrices.append((mClassifier, mClassifier.get_confusion_matrix()))
+
+        return self
+
+    def get_classifiers_and_confusion_matrices(self):
+        return self.classifiers_and_confusion_matrices
+
+    # path should be the path to store the plot (ending without a slash)
+    # i.e. f"data/classifierdata/results/plots/{LOG_NAME}/confusion_matrices"
+    def plot_confusion_matrices(self, path, labels=["Regular", "Malicious"]):
+        for mClassifier, confusion_matrix in self.classifiers_and_confusion_matrices:
+            mClassifier.plot_confusion_matrix(confusion_matrix, path + "/" + mClassifier.classifier.__class__.__name__ + ".png", labels=labels)

@@ -18,7 +18,7 @@ from EasyMLLib.CSVWriter import CSVWriter
 CLASSIFIER_INSTANCES = [RandomForestClassifier(
 ), DecisionTreeClassifier(), KNeighborsClassifier()]
 
-LOG_NAME = "MClassifierPipelineUser50ConstOffset"
+LOG_NAME = "MClassifierPipelineUser30attackers50ConstOffset"
 
 CSV_COLUMNS = ["Model", "Total_Train_Time",
                "Total_Train_Sample_Size", "Total_Test_Sample_Size", "Train_Time_Per_Sample", "Prediction_Train_Set_Time_Per_Sample", "Prediction_Test_Set_Time_Per_Sample",
@@ -27,7 +27,7 @@ CSV_COLUMNS = ["Model", "Total_Train_Time",
 
 CSV_FORMAT = {CSV_COLUMNS[i]: i for i in range(len(CSV_COLUMNS))}
 
-class MClassifierPipelineUser50ConstOffset:
+class MClassifierPipelineUser30attackers50ConstOffset:
 
 
     def __init__(self, logger=Logger(LOG_NAME), csvWriter=CSVWriter(f"{LOG_NAME}.csv", CSV_COLUMNS, outputpath=os.path.join("data", "classifierdata", "results"))):
@@ -57,9 +57,9 @@ class MClassifierPipelineUser50ConstOffset:
 
         # cleaning/adding attackers to the data
         train = DataAttacker(DataCleaner(train, cleandatapath=f"data/classifierdata/clean/{LOG_NAME}/clean_train.csv", logger=self.logger.newPrefix("DataCleaner")).clean_data().getCleanedData(),
-                            modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_train.csv", SEED=24, logger=self.logger.newPrefix("DataAttacker")).add_attackers().add_attacks_positional_offset_const().getData()
+                            modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_train.csv", SEED=24, logger=self.logger.newPrefix("DataAttacker")).add_attackers(attack_ratio=0.3).add_attacks_positional_offset_const().getData()
         test = DataAttacker(DataCleaner(test, cleandatapath=f"data/classifierdata/clean/{LOG_NAME}/clean_test.csv", logger=self.logger.newPrefix("DataCleaner")).clean_data().getCleanedData(),
-                            modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_test.csv", SEED=48, logger=self.logger.newPrefix("DataAttacker")).add_attackers().add_attacks_positional_offset_const().getData()
+                            modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_test.csv", SEED=48, logger=self.logger.newPrefix("DataAttacker")).add_attackers(attack_ratio=0.3).add_attacks_positional_offset_const().getData()
 
         # Cleaning it for the malicious data detection
         mdcleaner_train = MDataCleaner(train, cleandatapath=f"data/classifierdata/Mclean/{LOG_NAME}/clean_train.csv", logger=self.logger.newPrefix("MDataCleaner"))
@@ -134,5 +134,5 @@ class MClassifierPipelineUser50ConstOffset:
 
 
 if __name__ == "__main__":
-    mcplu = MClassifierPipelineUser50ConstOffset()
+    mcplu = MClassifierPipelineUser30attackers50ConstOffset()
     mcplu.run()

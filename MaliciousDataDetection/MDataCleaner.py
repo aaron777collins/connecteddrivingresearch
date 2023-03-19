@@ -16,11 +16,32 @@ COLUMNS=[
         "coreData_id", "coreData_position_lat", "coreData_position_long",
         "coreData_elevation", "coreData_accelset_accelYaw","coreData_speed", "coreData_heading", "x_pos", "y_pos", "isAttacker"]
 
+# COLUMNS_EXT=[
+# # "metadata_generatedAt", "metadata_recordType", "metadata_serialId_streamId",
+# #  "metadata_serialId_bundleSize", "metadata_serialId_bundleId", "metadata_serialId_recordId",
+# #  "metadata_serialId_serialNumber", "metadata_receivedAt",
+# #  "metadata_rmd_elevation", "metadata_rmd_heading","metadata_rmd_latitude", "metadata_rmd_longitude", "metadata_rmd_speed",
+# #  "metadata_rmd_rxSource","metadata_bsmSource",
+#     "coreData_id", "coreData_position_lat", "coreData_position_long",
+#     "coreData_secMark", "accuracy_semiMajor", "accuracy_semiMinor",
+#     "coreData_elevation", "coreData_accelset_accelYaw","coreData_speed", "coreData_heading", "x_pos", "y_pos", "isAttacker"]
+
+# COLUMNS_EXT_WITH_TIMESTAMPS=[
+# # "metadata_generatedAt", "metadata_recordType", "metadata_serialId_streamId",
+# #  "metadata_serialId_bundleSize", "metadata_serialId_bundleId", "metadata_serialId_recordId",
+# #  "metadata_serialId_serialNumber", "metadata_receivedAt",
+# #  "metadata_rmd_elevation", "metadata_rmd_heading","metadata_rmd_latitude", "metadata_rmd_longitude", "metadata_rmd_speed",
+# #  "metadata_rmd_rxSource","metadata_bsmSource",
+#     "coreData_id", "coreData_position_lat", "coreData_position_long",
+#     "coreData_secMark", "accuracy_semiMajor", "accuracy_semiMinor",
+#     "month", "day", "year", "hour", "minute", "second", "pm",
+#     "coreData_elevation", "coreData_accelset_accelYaw","coreData_speed", "coreData_heading", "x_pos", "y_pos", "isAttacker"]
 class MDataCleaner:
-    def __init__(self, data, COLUMNS=COLUMNS, cleandatapath="data/classifierdata/Mclean/clean.csv", logger=Logger("MDataCleaner")):
+    def __init__(self, data, columns=COLUMNS, cleandatapath="data/classifierdata/Mclean/clean.csv", logger=Logger("MDataCleaner")):
         self.data = data
         self.cleandatapath=cleandatapath
         self.logger = logger
+        self.columns = columns
 
     def clean_data(self):
         os.makedirs(os.path.dirname(self.cleandatapath), exist_ok=True)
@@ -33,7 +54,7 @@ class MDataCleaner:
 
         # clean the data
         self.logger.log("Cleaning data...")
-        self.cleaned_data = self.data[COLUMNS]
+        self.cleaned_data = self.data[self.columns]
         # convert the coreData_id from hexadecimal to decimal
         self.cleaned_data["coreData_id"] = self.cleaned_data["coreData_id"].map(lambda x: int(x, 16))
         self.cleaned_data.to_csv(self.cleandatapath, index=False)

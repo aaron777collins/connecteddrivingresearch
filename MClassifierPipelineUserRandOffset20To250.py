@@ -108,7 +108,7 @@ class MClassifierPipelineUserRandOffset20To250:
             #    "test_accuracy", "test_precision", "test_recall", "test_f1"
 
             csvrowdata = {
-                "Model": LOG_NAME,
+                "Model": mclassifier.classifier.__class__.__name__,
                 "Total_Train_Time": mclassifier.elapsed_train_time,
                 "Total_Train_Sample_Size": len(train_X), # train and test have the same number of samples
                 "Total_Test_Sample_Size": len(test_X), # train and test have the same number of samples
@@ -124,9 +124,13 @@ class MClassifierPipelineUserRandOffset20To250:
                 "test_recall": result[2],
                 "test_f1": result[3]}
             self.write_entire_row(csvrowdata)
+        # calculating confusion matrices and storing them
+        mcp.logger.log("Calculating confusion matrices and storing...")
+        # path to store the confusion matrices
+        plotpath = f"data/classifierdata/results/plots/{LOG_NAME}/confusion_matrices"
+        mcp.calculate_classifiers_and_confusion_matrices().plot_confusion_matrices(plotpath)
 
 
 if __name__ == "__main__":
     mcplu = MClassifierPipelineUserRandOffset20To250()
-    mcplu.logger.log("Running pipeline user 50 const offset...")
     mcplu.run()

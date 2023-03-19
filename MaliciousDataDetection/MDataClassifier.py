@@ -1,11 +1,15 @@
 import time
 
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+import os
+
+from Logger import Logger
 
 # Creates uses the data to classify whether or not a vehicle is an attacker
 # Takes in a sklearn classifier and the data to classify
 class MDataClassifier:
-    def __init__(self, classifier, train_X, train_Y, test_X, test_Y):
+    def __init__(self, classifier, train_X, train_Y, test_X, test_Y, logger=Logger("MDataClassifier")):
         self.classifier = classifier
         self.train_X = train_X
         self.train_Y = train_Y
@@ -15,6 +19,7 @@ class MDataClassifier:
         self.elapsed_prediction_time = -1
         self.elapsed_prediction_train_time = -1
         self.results = None
+        self.logger = logger
 
     # training the classifier and tracking the time it takes
     def train(self):
@@ -70,6 +75,17 @@ class MDataClassifier:
         recall = recall_score(self.train_Y, self.predicted_train_results)
         f1 = f1_score(self.train_Y, self.predicted_train_results)
         return accuracy, precision, recall, f1
+
+    def get_confusion_matrix(self) -> list[list[float]]:
+        return confusion_matrix(self.test_Y, self.predicted_results, normalize='all')
+
+    # plots confusion matrix using ConfusionMatrixDisplay
+    def plot_confusion_matrix(self, confusion_matrix, path, labels=["Regular", "Malicious"]):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        self.logger.log("Plotting confusion matrix to " + path)
+        disp = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix, display_labels=labels)
+        disp.plot()
+        plt.savefig(path)
 
     # string representation of the classifier classname as MDataClassifier[classifier_name]
     def __str__(self):
