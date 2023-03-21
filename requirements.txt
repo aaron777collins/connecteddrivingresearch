@@ -4,3 +4,4 @@ scikit-learn
 geographiclib
 easymllib>=0.1.2
 matplotlib
+tensorflow
