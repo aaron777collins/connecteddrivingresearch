@@ -10,15 +10,26 @@ from DataCleaner import DataCleaner
 from DataGatherer import DataGatherer
 from LogLevel import LogLevel
 from Logger import Logger
+from MaliciousDataDetection.DeepLearningDataConverter import DeepLearningDataConverter
+from MaliciousDataDetection.IDMapper import IDMapper
 from MaliciousDataDetection.MClassifierPipeline import MClassifierPipeline
 from MaliciousDataDetection.MDataCleaner import MDataCleaner
+from MaliciousDataDetection.Models.LSTMModel import LSTMModel
+
 from EasyMLLib.CSVWriter import CSVWriter
 
+from MaliciousDataDetection.MDeepLearningClassifierPipeline import MDeepLearningClassifierPipeline
 
-CLASSIFIER_INSTANCES = [RandomForestClassifier(
-), DecisionTreeClassifier(), KNeighborsClassifier()]
+numInputs = 19
+numSplit = 5
+totalInputs = numInputs + numSplit
 
-LOG_NAME = "MClassifierPipelineUser30attackersRandOffset20To250"
+DEEP_LEARNING_CLASSIFIER_INSTANCES = [
+    # 65535 + 1 just incase
+    LSTMModel.getCompiledModel(LSTMModel.getUncompiledModel(totalInputs, 1, memoryunits=128, activation="sigmoid", embedding=True, embeddingInputDim=100000, embeddingOutputDim=50), loss="binary_crossentropy", optimizer="adam", metrics=["accuracy", "mse", "mae"])
+]
+
+LOG_NAME = "MLSTMClassifierPipelineUserEXTTimestampsCols30attackers50000ConstOffset"
 
 CSV_COLUMNS = ["Model", "Total_Train_Time",
                "Total_Train_Sample_Size", "Total_Test_Sample_Size", "Train_Time_Per_Sample", "Prediction_Train_Set_Time_Per_Sample", "Prediction_Test_Set_Time_Per_Sample",
@@ -27,7 +38,7 @@ CSV_COLUMNS = ["Model", "Total_Train_Time",
 
 CSV_FORMAT = {CSV_COLUMNS[i]: i for i in range(len(CSV_COLUMNS))}
 
-class MClassifierPipelineUser30attackersRandOffset20To250:
+class MLSTMClassifierPipelineUserEXTTimestampsCols30attackers50000ConstOffset:
 
 
     def __init__(self, logger=Logger(LOG_NAME), csvWriter=CSVWriter(f"{LOG_NAME}.csv", CSV_COLUMNS, outputpath=os.path.join("data", "classifierdata", "results"))):
@@ -42,6 +53,7 @@ class MClassifierPipelineUser30attackersRandOffset20To250:
 
         self.csvWriter.addRow(row)
 
+
     def run(self):
         # main method
         # Getting the first 20000 rows of data and splitting it into train and test sets (10000 rows each)
@@ -55,16 +67,53 @@ class MClassifierPipelineUser30attackersRandOffset20To250:
         test = data.iloc[10000:20000].copy()
 
         # cleaning/adding attackers to the data
-        train = DataAttacker(DataCleaner(train, cleandatapath=f"data/classifierdata/clean/{LOG_NAME}/clean_train.csv", logger=self.logger.newPrefix("DataCleaner")).clean_data().getCleanedData(),
-                            modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_train.csv", SEED=24, logger=self.logger.newPrefix("DataAttacker")).add_attackers(attack_ratio=0.3).add_attacks_positional_offset_rand().getData()
-        test = DataAttacker(DataCleaner(test, cleandatapath=f"data/classifierdata/clean/{LOG_NAME}/clean_test.csv", logger=self.logger.newPrefix("DataCleaner")).clean_data().getCleanedData(),
-                            modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_test.csv", SEED=48, logger=self.logger.newPrefix("DataAttacker")).add_attackers(attack_ratio=0.3).add_attacks_positional_offset_rand().getData()
+        train = DataAttacker(DataCleaner(train, cleandatapath=f"data/classifierdata/clean/{LOG_NAME}/clean_train.csv", logger=self.logger.newPrefix("DataCleaner")).clean_data_with_timestamps().getCleanedData(),
+                            modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_train.csv", SEED=24, logger=self.logger.newPrefix("DataAttacker")).add_attackers(attack_ratio=0.3).add_attacks_positional_offset_const(distance_meters=50000).getData()
+        test = DataAttacker(DataCleaner(test, cleandatapath=f"data/classifierdata/clean/{LOG_NAME}/clean_test.csv", logger=self.logger.newPrefix("DataCleaner")).clean_data_with_timestamps().getCleanedData(),
+                            modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_test.csv", SEED=48, logger=self.logger.newPrefix("DataAttacker")).add_attackers(attack_ratio=0.3).add_attacks_positional_offset_const(distance_meters=50000).getData()
+
+        # Normally ["coreData_id", "coreData_position_lat", "coreData_position_long",
+        # "coreData_elevation", "coreData_accelset_accelYaw","coreData_speed", "coreData_heading", "x_pos", "y_pos", "isAttacker"]
+
+        COLUMNS_EXT_WITH_TIMESTAMPS=[
+        # "metadata_generatedAt", "metadata_recordType", "metadata_serialId_streamId",
+        #  "metadata_serialId_bundleSize", "metadata_serialId_bundleId", "metadata_serialId_recordId",
+        #  "metadata_serialId_serialNumber", "metadata_receivedAt",
+        #  "metadata_rmd_elevation", "metadata_rmd_heading","metadata_rmd_latitude", "metadata_rmd_longitude", "metadata_rmd_speed",
+        #  "metadata_rmd_rxSource","metadata_bsmSource",
+            "coreData_id", "coreData_position_lat", "coreData_position_long",
+            "coreData_secMark", "coreData_accuracy_semiMajor", "coreData_accuracy_semiMinor",
+            "month", "day", "year", "hour", "minute", "second", "pm",
+            "coreData_elevation", "coreData_accelset_accelYaw","coreData_speed", "coreData_heading", "x_pos", "y_pos", "isAttacker"]
 
         # Cleaning it for the malicious data detection
-        mdcleaner_train = MDataCleaner(train, cleandatapath=f"data/classifierdata/Mclean/{LOG_NAME}/clean_train.csv", logger=self.logger.newPrefix("MDataCleaner"))
-        mdcleaner_test = MDataCleaner(test, cleandatapath=f"data/classifierdata/Mclean/{LOG_NAME}/clean_test.csv", logger=self.logger.newPrefix("MDataCleaner"))
+        mdcleaner_train = MDataCleaner(train, cleandatapath=f"data/classifierdata/Mclean/{LOG_NAME}/clean_train.csv", columns=COLUMNS_EXT_WITH_TIMESTAMPS, logger=self.logger.newPrefix("MDataCleaner"))
+        mdcleaner_test = MDataCleaner(test, cleandatapath=f"data/classifierdata/Mclean/{LOG_NAME}/clean_test.csv", columns=COLUMNS_EXT_WITH_TIMESTAMPS, logger=self.logger.newPrefix("MDataCleaner"))
         m_train = mdcleaner_train.clean_data().get_cleaned_data()
         m_test = mdcleaner_test.clean_data().get_cleaned_data()
+
+        m_train = DeepLearningDataConverter.add_positive_columns(m_train, ["coreData_position_lat",
+                                                                           "coreData_position_long",
+                                                                           "coreData_accelset_accelYaw",
+                                                                           "x_pos",
+                                                                           "y_pos"])
+        m_test = DeepLearningDataConverter.add_positive_columns(m_test, ["coreData_position_lat",
+                                                                           "coreData_position_long",
+                                                                           "coreData_accelset_accelYaw",
+                                                                           "x_pos",
+                                                                           "y_pos"])
+
+        # remap ids
+        m_train["coreData_id"] = m_train["coreData_id"].map(lambda x: IDMapper.getID(x))
+        m_test["coreData_id"] = m_test["coreData_id"].map(lambda x: IDMapper.getID(x))
+
+        # logging the max ID
+        self.logger.log(f"Max ID: {IDMapper.id_counter}")
+
+        self.logger.log("Malicious data train:")
+        self.logger.log(m_train.head(5))
+        self.logger.log("Malicious data test:")
+        self.logger.log(m_test.head(5))
 
         # splitting into X and Y
         attacker_col_name = "isAttacker"
@@ -74,7 +123,7 @@ class MClassifierPipelineUser30attackersRandOffset20To250:
         test_Y = m_test[attacker_col_name]
 
         # training the classifiers
-        mcp = MClassifierPipeline(train_X, train_Y, test_X, test_Y, classifier_instances=CLASSIFIER_INSTANCES, logger=self.logger.newPrefix("MClassifierPipeline"))
+        mcp = MDeepLearningClassifierPipeline(train_X, train_Y, test_X, test_Y, classifier_instances=DEEP_LEARNING_CLASSIFIER_INSTANCES, logger=self.logger.newPrefix("MDeepLearningClassifierPipeline"))
 
         mcp.train()
         mcp.test()
@@ -97,7 +146,8 @@ class MClassifierPipelineUser30attackersRandOffset20To250:
             mcp.logger.log("F1: ", result[3])
             # printing the elapsed training and prediction time
             mcp.logger.log("Elapsed Training Time: ", mclassifier.elapsed_train_time)
-            mcp.logger.log("Elapsed Prediction Time: ", mclassifier.elapsed_prediction_time)
+            mcp.logger.log("Elapsed Prediction Train-Set Time: ", mclassifier.elapsed_prediction_train_time)
+            mcp.logger.log("Elapsed Prediction Test-Set Time: ", mclassifier.elapsed_prediction_time)
 
             mcp.logger.log("Writing to CSV...")
 
@@ -124,6 +174,7 @@ class MClassifierPipelineUser30attackersRandOffset20To250:
                 "test_recall": result[2],
                 "test_f1": result[3]}
             self.write_entire_row(csvrowdata)
+
         # calculating confusion matrices and storing them
         mcp.logger.log("Calculating confusion matrices and storing...")
         # path to store the confusion matrices
@@ -132,5 +183,5 @@ class MClassifierPipelineUser30attackersRandOffset20To250:
 
 
 if __name__ == "__main__":
-    mcplu = MClassifierPipelineUser30attackersRandOffset20To250()
+    mcplu = MLSTMClassifierPipelineUserEXTTimestampsCols30attackers50000ConstOffset()
     mcplu.run()

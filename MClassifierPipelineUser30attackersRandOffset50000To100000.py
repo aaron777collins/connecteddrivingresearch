@@ -10,7 +10,7 @@ from DataCleaner import DataCleaner
 from DataGatherer import DataGatherer
 from LogLevel import LogLevel
 from Logger import Logger
-from MClassifierPipeline import MClassifierPipeline
+from MaliciousDataDetection.MClassifierPipeline import MClassifierPipeline
 from MaliciousDataDetection.MDataCleaner import MDataCleaner
 from EasyMLLib.CSVWriter import CSVWriter
 
