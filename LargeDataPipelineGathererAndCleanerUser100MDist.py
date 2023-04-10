@@ -18,7 +18,7 @@ from EasyMLLib.CSVWriter import CSVWriter
 CLASSIFIER_INSTANCES = [RandomForestClassifier(
 ), DecisionTreeClassifier(), KNeighborsClassifier()]
 
-LOG_NAME = "LargeDataPipelineGathererUser100MDist"
+LOG_NAME = "LargeDataPipelineGathererAndCleanerUser100MDist"
 
 CSV_COLUMNS = ["Model", "Total_Train_Time",
                "Total_Train_Sample_Size", "Total_Test_Sample_Size", "Train_Time_Per_Sample", "Prediction_Train_Set_Time_Per_Sample", "Prediction_Test_Set_Time_Per_Sample",
@@ -28,7 +28,7 @@ CSV_COLUMNS = ["Model", "Total_Train_Time",
 CSV_FORMAT = {CSV_COLUMNS[i]: i for i in range(len(CSV_COLUMNS))}
 
 # will be relied on by other methods to gather large data and filter it to a small area
-class LargeDataPipelineGathererUser100MDist:
+class LargeDataPipelineGathererAndCleanerUser100MDist:
 
 
     def __init__(self, logger=Logger(LOG_NAME), csvWriter=CSVWriter(f"{LOG_NAME}.csv", CSV_COLUMNS, outputpath=os.path.join("data", "classifierdata", "results"))):
@@ -54,5 +54,5 @@ class LargeDataPipelineGathererUser100MDist:
 
 
 if __name__ == "__main__":
-    mcplu = LargeDataPipelineGathererUser100MDist()
+    mcplu = LargeDataPipelineGathererAndCleanerUser100MDist()
     mcplu.run()
