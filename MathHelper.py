@@ -1,6 +1,5 @@
 import math
 from geographiclib.geodesic import Geodesic
-from geopy import distance
 
 
 class MathHelper:

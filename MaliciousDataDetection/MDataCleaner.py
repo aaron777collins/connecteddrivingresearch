@@ -52,11 +52,20 @@ class MDataCleaner:
             self.cleaned_data = pd.read_csv(self.cleandatapath)
             return self
 
+        def convert_large_hex_str_to_hex(num):
+            # account for str with decimal point
+            if "." in num:
+                num = num.split(".")[0]
+            # convert to hex
+            num = int(num, 16)
+
+            return num
+
         # clean the data
         self.logger.log("Cleaning data...")
         self.cleaned_data = self.data[self.columns]
         # convert the coreData_id from hexadecimal to decimal
-        self.cleaned_data["coreData_id"] = self.cleaned_data["coreData_id"].map(lambda x: int(x, 16))
+        self.cleaned_data["coreData_id"] = self.cleaned_data["coreData_id"].map(lambda x: convert_large_hex_str_to_hex(x))
         self.cleaned_data.to_csv(self.cleandatapath, index=False)
         return self
 
