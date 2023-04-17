@@ -6,6 +6,8 @@ from DataGatherer import DataGatherer
 from Logger import Logger
 from sklearn.model_selection import train_test_split
 
+from MathHelper import MathHelper
+
 COLUMNS=["metadata_generatedAt", "metadata_recordType", "metadata_serialId_streamId",
             "metadata_serialId_bundleSize", "metadata_serialId_bundleId", "metadata_serialId_recordId",
             "metadata_serialId_serialNumber", "metadata_receivedAt",
@@ -26,7 +28,7 @@ class DataCleaner:
             self.logger.log("No data specified. Defaulting to data/raw/subsection.csv")
             self.data = DataGatherer().gather_data()
 
-    def clean_data(self):
+    def clean_data(self, **kwargs):
         os.makedirs(os.path.dirname(self.cleandatapath), exist_ok=True)
         self.cleaned_data = self.data[self.columns]
         self.cleaned_data = self.cleaned_data.dropna()
@@ -36,7 +38,7 @@ class DataCleaner:
         self.cleaned_data.to_csv(self.cleandatapath, index=False)
         return self
 
-    def clean_data_with_timestamps(self):
+    def clean_data_with_timestamps(self, **kwargs):
         os.makedirs(os.path.dirname(self.cleandatapath), exist_ok=True)
         self.cleaned_data = self.data[self.columns]
         self.cleaned_data = self.cleaned_data.dropna()
@@ -56,6 +58,16 @@ class DataCleaner:
         self.cleaned_data["metadata_generatedAt"]
         self.cleaned_data.drop(columns=["coreData_position"], inplace=True)
         self.cleaned_data.to_csv(self.cleandatapath, index=False)
+        return self
+
+    def clean_data_with_OTHER_FUNC_Then_XY(self, otherCleanFunction=clean_data_with_timestamps, x_col="x_pos", y_col="y_pos", x_pos=-105.1159611, y_pos=41.0982327, **kwargs):
+        otherCleanFunction(self)
+        # changing the position to x and y
+
+        # locking 1 axis to x_pos or y_pos to get the components of the other axis (easier than using sin and cos)
+        self.cleaned_data[x_col] = self.cleaned_data[x_col].map(lambda x: MathHelper.dist_between_two_points(x, y_pos, x_pos, y_pos))
+        self.cleaned_data[y_col] = self.cleaned_data[y_col].map(lambda y: MathHelper.dist_between_two_points(x_pos, y, x_pos, y_pos))
+
         return self
 
     def getCleanedData(self):

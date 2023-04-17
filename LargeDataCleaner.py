@@ -34,7 +34,7 @@ class LargeDataCleaner:
             self.logger.log(f"Cleaning file {file}")
             df = pd.read_csv(file)
             dc = DataCleaner(data=df, logger=self.logger.newPrefix("DataCleaner"))
-            newDf = cleanFunc(dc).getCleanedData()
+            newDf = cleanFunc(dc, **kwargs).getCleanedData()
             if (filterFunction != None):
                 newDf = filterFunction(newDf, **kwargs)
 
@@ -46,10 +46,25 @@ class LargeDataCleaner:
 
         return self
 
-    def within_range(self, df, x_col="x_pos", y_col="y_pos", x_pos=0, y_pos=0, max_dist=10000):
+    @staticmethod
+    def within_range(df, x_col="x_pos", y_col="y_pos", x_pos=0, y_pos=0, max_dist=10000, **kwargs):
         # calculate the distance between each point and (x_pos, y_pos)
         df = df.copy()
         df['distance'] = df.apply(lambda row: MathHelper.dist_between_two_points(row[x_col], row[y_col], x_pos, y_pos), axis=1)
+        # filter out points that are outside the max distance
+        df = df[df['distance'] <= max_dist]
+        # drop the 'distance' column
+        df.drop('distance', axis=1, inplace=True)
+        return df
+
+    @staticmethod
+    def within_rangeXY(df, x_col="x_pos", y_col="y_pos", max_dist=10000, **kwargs):
+        # assume (0, 0) is the center of the map
+        x_pos = 0
+        y_pos = 0
+        # calculate the distance between each point and (x_pos, y_pos)
+        df = df.copy()
+        df['distance'] = df.apply(lambda row: MathHelper.dist_between_two_pointsXY(row[x_col], row[y_col], x_pos, y_pos), axis=1)
         # filter out points that are outside the max distance
         df = df[df['distance'] <= max_dist]
         # drop the 'distance' column

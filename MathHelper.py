@@ -28,5 +28,9 @@ class MathHelper:
         return distance['s12']
 
     @staticmethod
+    def dist_between_two_pointsXY(x1, y1, x2, y2):
+        return math.sqrt((x1-x2)**2 + (y1-y2)**2)
+
+    @staticmethod
     def deg2rad(deg):
         return deg * (math.pi/180)
