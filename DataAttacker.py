@@ -73,7 +73,7 @@ class DataAttacker:
 
         # Checking if the row is an attacker
         # applying the attack function to each row
-        self.data.apply(lambda row: self.positional_offset_const_attack(row, direction_angle, distance_meters), axis=1)
+        self.data = self.data.apply(lambda row: self.positional_offset_const_attack(row, direction_angle, distance_meters), axis=1)
 
         return self
 
@@ -102,7 +102,8 @@ class DataAttacker:
 
     def add_attacks_positional_offset_rand(self, min_dist=25, max_dist = 250):
         # similar to the const attack, but the distance and direction is random
-        self.data.apply(lambda row: self.positional_offset_rand_attack(row, min_dist, max_dist), axis=1)
+
+        self.data = self.data.apply(lambda row: self.positional_offset_rand_attack(row, min_dist, max_dist), axis=1)
 
         return self
 

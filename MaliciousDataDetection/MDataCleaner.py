@@ -13,7 +13,7 @@ COLUMNS=[
     #  "metadata_serialId_serialNumber", "metadata_receivedAt",
     #  "metadata_rmd_elevation", "metadata_rmd_heading","metadata_rmd_latitude", "metadata_rmd_longitude", "metadata_rmd_speed",
     #  "metadata_rmd_rxSource","metadata_bsmSource",
-        "coreData_id", "coreData_position_lat", "coreData_position_long",
+        "coreData_id", # "coreData_position_lat", "coreData_position_long",
         "coreData_elevation", "coreData_accelset_accelYaw","coreData_speed", "coreData_heading", "x_pos", "y_pos", "isAttacker"]
 
 # COLUMNS_EXT=[
