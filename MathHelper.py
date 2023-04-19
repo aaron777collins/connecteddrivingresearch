@@ -34,3 +34,18 @@ class MathHelper:
     @staticmethod
     def deg2rad(deg):
         return deg * (math.pi/180)
+
+    # direction_angle is north at 0 (- is to the west, + is to the east)
+    # x and y are standard coordinates as a distance from a lat long point
+    # uses regular cartesian coordinates
+    @staticmethod
+    def direction_and_dist_to_XY(x, y, direction_angle, distance_meters):
+        theta = 0
+        newAngle = theta + direction_angle
+
+        # calculating new x and y
+        x = x + distance_meters * math.cos(newAngle)
+        y = y + distance_meters * math.sin(newAngle)
+
+        return (x, y)
+

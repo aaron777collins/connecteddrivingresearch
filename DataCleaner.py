@@ -56,7 +56,7 @@ class DataCleaner:
         self.cleaned_data["pm"] = self.cleaned_data["metadata_generatedAt"].map(lambda x: 0 if x.hour < 12 else 1) # 0 if am, 1 if pm
 
         self.cleaned_data["metadata_generatedAt"]
-        self.cleaned_data.drop(columns=["coreData_position"], inplace=True)
+        self.cleaned_data.drop(columns=["coreData_position", "coreData_position_lat", "coreData_position_long"], inplace=True)
         self.cleaned_data.to_csv(self.cleandatapath, index=False)
         return self
 
