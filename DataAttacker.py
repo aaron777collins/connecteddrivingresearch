@@ -123,10 +123,10 @@ class DataAttacker:
         else:
 
             # calculating the positional offset based on a random direction and distance
-            newLat, newLong = MathHelper.direction_and_dist_to_lat_long_offset(row["coreData_position_lat"], row["coreData_position_long"], random.randint(0, 360), random.randint(min_dist, max_dist))
+            newLat, newLong = MathHelper.direction_and_dist_to_lat_long_offset(row[self.pos_lat_col], row[self.pos_long_col], random.randint(0, 360), random.randint(min_dist, max_dist))
 
-            row["coreData_position_lat"] = newLat
-            row["coreData_position_long"] = newLong
+            row[self.pos_lat_col] = newLat
+            row[self.pos_long_col] = newLong
 
         return row
 

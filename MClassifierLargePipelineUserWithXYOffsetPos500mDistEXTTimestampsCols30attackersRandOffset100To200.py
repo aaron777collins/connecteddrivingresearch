@@ -9,7 +9,7 @@ from DataAttacker import DataAttacker
 from DataCleaner import DataCleaner
 from DataGatherer import DataGatherer
 from LargeDataCleaner import LargeDataCleaner
-from LargeDataPipelineGathererAndCleanerUserDist import LargeDataPipelineGathererAndCleanerUserDist
+from LargeDataPipelineGathererAndCleanerWithCustomXYUserDist import LargeDataPipelineGathererAndCleanerWithCustomXYUserDist
 from LogLevel import LogLevel
 from Logger import Logger
 from MaliciousDataDetection.MClassifierPipeline import MClassifierPipeline
@@ -20,7 +20,7 @@ from EasyMLLib.CSVWriter import CSVWriter
 CLASSIFIER_INSTANCES = [RandomForestClassifier(
 ), DecisionTreeClassifier(), KNeighborsClassifier()]
 
-LOG_NAME = "MClassifierLargePipelineUser100KRowsTrainEXTTimestampsCols30attackersRandOffset50000To100000"
+LOG_NAME = "MClassifierLargePipelineUserWithXYOffsetPos500mDistEXTTimestampsCols30attackersRandOffset100To200"
 
 CSV_COLUMNS = ["Model", "Total_Train_Time",
                "Total_Train_Sample_Size", "Total_Test_Sample_Size", "Train_Time_Per_Sample", "Prediction_Train_Set_Time_Per_Sample", "Prediction_Test_Set_Time_Per_Sample",
@@ -30,7 +30,7 @@ CSV_COLUMNS = ["Model", "Total_Train_Time",
 CSV_FORMAT = {CSV_COLUMNS[i]: i for i in range(len(CSV_COLUMNS))}
 
 
-class MClassifierLargePipelineUser100KRowsTrainEXTTimestampsCols30attackersRandOffset50000To100000:
+class MClassifierLargePipelineUserWithXYOffsetPos500mDistEXTTimestampsCols30attackersRandOffset100To200:
 
     def __init__(self, logger=Logger(LOG_NAME), csvWriter=CSVWriter(f"{LOG_NAME}.csv", CSV_COLUMNS, outputpath=os.path.join("data", "classifierdata", "results"))):
         self.logger = logger
@@ -44,28 +44,33 @@ class MClassifierLargePipelineUser100KRowsTrainEXTTimestampsCols30attackersRandO
 
         self.csvWriter.addRow(row)
 
-
     def run(self):
-
-        ldpgacu = LargeDataPipelineGathererAndCleanerUserDist().run(
-            cleanFunc=DataCleaner.clean_data_with_timestamps,
-            filterFunction=LargeDataCleaner.within_range,
-            max_dist=100, x_col="x_pos", y_col="y_pos",
+        ldpgacuLogName = "LargeDataPipelineGathererAndCleanerWithCustomXYUserDist500m"
+        ldpgacu = LargeDataPipelineGathererAndCleanerWithCustomXYUserDist(
+            logger=Logger(ldpgacuLogName),
+            csvWriter=CSVWriter(f"{ldpgacuLogName}.csv", CSV_COLUMNS, outputpath=os.path.join("data", "classifierdata", "results")),
+            LOG_NAME=ldpgacuLogName
+        ).run(
+            cleanFunc=DataCleaner.clean_data_with_OTHER_FUNC_Then_XY,
+            otherCleanFunc=DataCleaner.clean_data_with_timestamps,
+            filterFunction=LargeDataCleaner.within_rangeXY,
+            max_dist=500, x_col="x_pos", y_col="y_pos",
             x_pos=-105.1159611, y_pos=41.0982327, lines_per_file=100000
         )
 
-
-        data: DataFrame = ldpgacu.getNRows(200000)
+        data: DataFrame = ldpgacu.getNRows(20000)
 
         # splitting into train and test sets
-        train = data.iloc[:100000].copy()
-        test = data.iloc[100000:200000].copy()
+        train = data.iloc[:10000].copy()
+        test = data.iloc[10000:20000].copy()
 
         # cleaning/adding attackers to the data
         train = DataAttacker(train,
-                             modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_train.csv", SEED=24, logger=self.logger.newPrefix("DataAttacker")).add_attackers(attack_ratio=0.3).add_attacks_positional_offset_rand(min_dist=50000, max_dist=100000).getData()
+                             modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_train.csv", SEED=24, logger=self.logger.newPrefix("DataAttacker"),
+                             isXYCoords=True).add_attackers(attack_ratio=0.3).add_attacks_positional_offset_rand(min_dist=50000, max_dist=100000).getData()
         test = DataAttacker(test,
-                            modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_test.csv", SEED=48, logger=self.logger.newPrefix("DataAttacker")).add_attackers(attack_ratio=0.3).add_attacks_positional_offset_rand(min_dist=50000, max_dist=100000).getData()
+                            modified_data_path=f"data/classifierdata/modified/{LOG_NAME}/modified_test.csv", SEED=48, logger=self.logger.newPrefix("DataAttacker"),
+                            isXYCoords=True).add_attackers(attack_ratio=0.3).add_attacks_positional_offset_rand(min_dist=50000, max_dist=100000).getData()
 
         # Normally ["coreData_id", "coreData_position_lat", "coreData_position_long",
         # "coreData_elevation", "coreData_accelset_accelYaw","coreData_speed", "coreData_heading", "x_pos", "y_pos", "isAttacker"]
@@ -76,7 +81,7 @@ class MClassifierLargePipelineUser100KRowsTrainEXTTimestampsCols30attackersRandO
             #  "metadata_serialId_serialNumber", "metadata_receivedAt",
             #  "metadata_rmd_elevation", "metadata_rmd_heading","metadata_rmd_latitude", "metadata_rmd_longitude", "metadata_rmd_speed",
             #  "metadata_rmd_rxSource","metadata_bsmSource",
-            "coreData_id", #"coreData_position_lat", "coreData_position_long",
+            "coreData_id",  # "coreData_position_lat", "coreData_position_long",
             "coreData_secMark", "coreData_accuracy_semiMajor", "coreData_accuracy_semiMinor",
             "month", "day", "year", "hour", "minute", "second", "pm",
             "coreData_elevation", "coreData_accelset_accelYaw", "coreData_speed", "coreData_heading", "x_pos", "y_pos", "isAttacker"]
@@ -161,5 +166,5 @@ class MClassifierLargePipelineUser100KRowsTrainEXTTimestampsCols30attackersRandO
 
 
 if __name__ == "__main__":
-    mcplu = MClassifierLargePipelineUser100KRowsTrainEXTTimestampsCols30attackersRandOffset50000To100000()
+    mcplu = MClassifierLargePipelineUserWithXYOffsetPos500mDistEXTTimestampsCols30attackersRandOffset100To200()
     mcplu.run()

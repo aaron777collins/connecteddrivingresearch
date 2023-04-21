@@ -55,11 +55,11 @@ class MClassifierLargePipelineUser1000KRowsTrainEXTTimestampsCols30attackersRand
         )
 
 
-        data: DataFrame = ldpgacu.getNRows(1200000)
+        data: DataFrame = ldpgacu.getNRows(2000000)
 
         # splitting into train and test sets
         train = data.iloc[:1000000].copy()
-        test = data.iloc[1000000:1200000].copy()
+        test = data.iloc[1000000:2000000].copy()
 
         # cleaning/adding attackers to the data
         train = DataAttacker(train,
