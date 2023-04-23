@@ -55,7 +55,7 @@ class MClassifierLargePipelineUserWithXYOffsetPos500mDistEXTTimestampsCols30atta
             otherCleanFunc=DataCleaner.clean_data_with_timestamps,
             filterFunction=LargeDataCleaner.within_rangeXY,
             max_dist=500, x_col="x_pos", y_col="y_pos",
-            x_pos=-105.1159611, y_pos=41.0982327, lines_per_file=100000
+            x_pos=-105.1159611, y_pos=41.0982327, lines_per_file=1000000
         )
 
         data: DataFrame = ldpgacu.getNRows(20000)
